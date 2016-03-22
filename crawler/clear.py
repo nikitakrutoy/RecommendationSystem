@@ -38,13 +38,13 @@ class Parser(HTMLParser):
         self.feed(page)
         return self._article
 
+
 def clear_page(page):
     return Parser().parse(page)
 
 
 def clear():
     article_text = ''
-    print(os.listdir(FILE_ROOT))
     for file in glob.glob(FILE_ROOT + '?*.html'):
         filename = file[file.rfind('/') + 1:file.rfind('.')]
         file_path = FILE_ROOT + filename + HTML_EXTENSION

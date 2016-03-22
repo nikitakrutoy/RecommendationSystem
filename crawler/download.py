@@ -4,6 +4,7 @@ from urllib.request import urlopen
 import os.path
 
 FILE_ROOT = 'articles/html/'
+HTML_EXTENSION = '.html'
 
 
 def get_page_text(link):
@@ -24,13 +25,14 @@ def download(urls):
         with open('links.txt', 'r') as lines:
             links = lines.read().split('\n')
     for link in links:
-        extension = '.txt'
         file_name = link[link.rfind('/') + 1:]
         print('Downloading ' + file_name + '...')
-        file_name += extension
+        file_name += HTML_EXTENSION
         file_path = FILE_ROOT + file_name
         if not os.path.isfile(file_path):
             page_text = get_page_text(link)
             with open(file_path, 'w') as html:
                 html.write(page_text)
+    lines.close()
+    html.close()
     print('done')
