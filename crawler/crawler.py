@@ -6,6 +6,7 @@ import sys
 from datetime import date, datetime
 from update import update
 from download import download
+from clear import clear
 
 
 def str_to_date(date_str):
@@ -41,21 +42,28 @@ def parse_argument(argv):
     )
     parser_update.add_argument(
         '--print',
-        help='print updated links',
+        help='prints updated links',
         action='store_true',
         dest='output'
     )
 
     parser_download = subparsers.add_parser(
         'download',
-        description='download html pages',
-        help='download html pages',
+        description='downloads html pages',
+        help='downloads html pages'
     )
 
     parser_download.add_argument(
         'urls',
         type=str,
-        nargs='*'
+        nargs='*',
+        help='list of urls to download'
+    )
+
+    parser_clear = subparsers.add_parser(
+        'clear',
+        description='clears downloaded pages',
+        help='clears downloaded pages'
     )
 
     return parser.parse_args();
@@ -67,7 +75,9 @@ def main():
     if command == 'update':
         update(args.from_date, args.to_date, args.output)
     elif command == 'download':
-       download(args.urls)
+        download(args.urls)
+    elif command == 'clear':
+        clear()
 
 if __name__ == '__main__':
     main()

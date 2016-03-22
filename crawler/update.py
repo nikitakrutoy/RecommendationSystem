@@ -14,7 +14,7 @@ class GetUrls(HTMLParser):
         self._flag_for_date = False
         self._in_b_tag = False
         self._links = list()
-        self.title = ''
+        self._title = ''
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
@@ -44,14 +44,14 @@ class GetUrls(HTMLParser):
 
     def handle_data(self, data):
         if self._in_a_tag:
-            self.title = data
+            self._title = data
         if self._in_b_tag and self._flag_for_date:
             #print(data)
             cur_date = datetime.strptime(str(data), '%d.%m.%Y').date()
-            link = {'link': self.link, 'title': self.title, 'date': cur_date}
+            link = {'link': self.link, 'title': self._title, 'date': cur_date}
             self._links.append(link)
 
-    def parse(self, page,):
+    def parse(self, page):
         self.feed(page)
         return self._links
 
