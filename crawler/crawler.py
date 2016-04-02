@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import argparse
 import sys
+import log
 
 from datetime import date, datetime
 from update import update
@@ -18,6 +19,13 @@ def parse_argument(argv):
         prog='crawler',
         description='Downloads articles from vc.ru',
         prefix_chars='--'
+    )
+    parser.add_argument(
+        '--log',
+        default='critical',
+        help='log level',
+        choices=['silence', 'critical', 'error',  'debug'],
+        dest='log_level'
     )
     subparsers = parser.add_subparsers(dest = 'command', help = 'available commands')
     parser_update = subparsers.add_parser(
@@ -71,7 +79,9 @@ def parse_argument(argv):
 
 def main():
     args = parse_argument(sys.argv)
+    log.config(log.level(args.log_level))
     command = args.command
+
     if command == 'update':
         update(args.from_date, args.to_date, args.output)
     elif command == 'download':
