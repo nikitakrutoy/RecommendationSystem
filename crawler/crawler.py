@@ -22,7 +22,6 @@ def parse_argument(argv):
     )
     parser.add_argument(
         '--log',
-        default='critical',
         help='log level',
         choices=['silence', 'critical', 'error',  'debug'],
         dest='log_level'
@@ -83,10 +82,13 @@ def main():
     command = args.command
 
     if command == 'update':
+        log.debug('running update')
         update(args.from_date, args.to_date, args.output)
     elif command == 'download':
+        log.debug('running download')
         download(args.urls)
     elif command == 'clear':
+        log.debug('running clear')
         clear()
 
 if __name__ == '__main__':

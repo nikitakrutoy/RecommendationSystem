@@ -3,6 +3,10 @@
 from urllib.request import urlopen
 from html.parser import HTMLParser
 from datetime import date, datetime
+from download import get_page_text
+
+import log
+
 
 
 class GetUrls(HTMLParser):
@@ -74,30 +78,26 @@ def check_for_date(list_of_links, from_date, to_date):
 def update(from_date, to_date, output):
     list_of_links = list()
     cur_date = from_date
-    print('wait...')
     while cur_date.month <= to_date.month or cur_date.year < to_date.year:
-        print('Downloading data for', cur_date, "...")
+        log.debug('Downloading data  ' + str(cur_date) + "...")
         link_suffix = str(cur_date.year) + '/' + str(cur_date.month // 10) + str(cur_date.month % 10)
         link = VC_ARCHIVE_ROOT + link_suffix
-        month_page = urlopen(link)
-        month_page_text = month_page.read().decode('utf-8')
+        month_page_text = get_page_text(link)
+        #month_page_text = month_page.read().decode('utf-8')
         list_of_links = list_of_links + get_urls(month_page_text)
-
-        list_of_links = check_for_date(list_of_links, from_date, to_date)
-
         temp = cur_date.month
 
         if temp == 12:
             cur_date = date(cur_date.year + 1, temp % 12 + 1, cur_date.day)
         else:
             cur_date = date(cur_date.year, temp % 12 + 1, cur_date.day)
-
+    list_of_links = check_for_date(list_of_links, from_date, to_date)
     with open('links.txt', 'w') as links:
         for link in list_of_links:
             links.write(link['link'] + '\n')
     links.close()
 
-    print('done')
+    log.debug('all updated')
     if output:
         print('Articles: ')
         for link in list_of_links:

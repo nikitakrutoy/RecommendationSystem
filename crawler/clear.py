@@ -3,6 +3,7 @@
 from html.parser import HTMLParser
 import os
 import glob
+import log
 
 
 FILE_ROOT = 'articles/html/'
@@ -52,8 +53,10 @@ def clear():
         if not os.path.isfile(article_path):
             with open(file_path, 'r') as html:
                 page = html.read()
+            log.debug('clearing ' + filename + '...')
             article_text = clear_page(page)
             article = open(article_path, 'w')
             article.write(article_text)
             html.close()
             article.close()
+    log.debug('all cleared')
