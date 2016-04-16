@@ -1,3 +1,6 @@
+#!/usr/local/bin/python3
+# -*- coding: utf-8 -*-
+
 import logging
 
 MESSAGE_FORMAT ='[%(asctime)s] %(levelname)-8s : %(message)s'
@@ -10,6 +13,7 @@ DEBUG = logging.DEBUG
 
 
 debug = logging.debug
+info = logging.info
 error = logging.error
 critical = logging.critical
 

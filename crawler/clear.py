@@ -4,12 +4,31 @@ from html.parser import HTMLParser
 import os
 import glob
 import log
+import argparse
 
 
-FILE_ROOT = 'articles/html/'
+HTML_ROOT = 'articles/html/'
 ARTICLE_ROOT = 'articles/text/'
 HTML_EXTENSION = '.html'
 TXT_EXTENSION = '.txt'
+
+def parse_argument():
+    parser = argparse.ArgumentParser(
+        prog='clear',
+        description="parse articles's htmls",
+        prefix_chars='--'
+    )
+
+
+    parser.add_argument(
+        '--log',
+        help='log level',
+        default='critical',
+        choices=['critical', 'error', 'debug'],
+        dest='log_level'
+    )
+
+    return parser.parse_args()
 
 
 class Parser(HTMLParser):
@@ -45,10 +64,9 @@ def clear_page(page):
 
 
 def clear():
-    article_text = ''
-    for file in glob.glob(FILE_ROOT + '?*.html'):
+    for file in glob.glob(HTML_ROOT + '?*.html'):
         filename = file[file.rfind('/') + 1:file.rfind('.')]
-        file_path = FILE_ROOT + filename + HTML_EXTENSION
+        file_path = HTML_ROOT + filename + HTML_EXTENSION
         article_path = ARTICLE_ROOT + filename + TXT_EXTENSION
         if not os.path.isfile(article_path):
             with open(file_path, 'r') as html:
@@ -59,4 +77,14 @@ def clear():
             article.write(article_text)
             html.close()
             article.close()
-    log.debug('all cleared')
+    log.debug('done')
+
+def main():
+    args = parse_argument()
+    log.config(log.level(args.log_level))
+    log.info('running clear with ' + args.log_level + ' logging level')
+    clear()
+
+
+if __name__ == '__main__':
+    main()

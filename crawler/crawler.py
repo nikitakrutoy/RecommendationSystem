@@ -14,7 +14,7 @@ def str_to_date(date_str):
     return datetime.strptime(date_str, '%d-%m-%y').date()
 
 
-def parse_argument(argv):
+def parse_argument():
     parser = argparse.ArgumentParser(
         prog='crawler',
         description='Downloads articles from vc.ru',
@@ -23,7 +23,8 @@ def parse_argument(argv):
     parser.add_argument(
         '--log',
         help='log level',
-        choices=['silence', 'critical', 'error',  'debug'],
+        default='critical',
+        choices=['critical', 'error',  'debug'],
         dest='log_level'
     )
     subparsers = parser.add_subparsers(dest = 'command', help = 'available commands')
@@ -73,11 +74,11 @@ def parse_argument(argv):
         help='clears downloaded pages'
     )
 
-    return parser.parse_args();
+    return parser.parse_args()
 
 
 def main():
-    args = parse_argument(sys.argv)
+    args = parse_argument()
     log.config(log.level(args.log_level))
     command = args.command
 
