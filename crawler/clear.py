@@ -16,14 +16,13 @@ def parse_argument():
     parser = argparse.ArgumentParser(
         prog='clear',
         description="parse articles's htmls",
-        prefix_chars='--'
     )
 
 
     parser.add_argument(
         '--log',
         help='log level',
-        default='critical',
+        default='error',
         choices=['critical', 'error', 'debug'],
         dest='log_level'
     )
@@ -71,20 +70,19 @@ def clear():
         if not os.path.isfile(article_path):
             with open(file_path, 'r') as html:
                 page = html.read()
-            log.debug('clearing ' + filename + '...')
+            log.debug('Clear {filename}')
             article_text = clear_page(page)
             article = open(article_path, 'w')
             article.write(article_text)
-            html.close()
             article.close()
-    log.debug('done')
 
 def main():
     args = parse_argument()
     log.config(log.level(args.log_level))
-    log.info('running clear with ' + args.log_level + ' logging level')
-    clear()
-
+    try:
+        clear()
+    except Exception as e:
+        log.critical("Clear error occured: {e}")
 
 if __name__ == '__main__':
     main()

@@ -1,28 +1,23 @@
 #!/usr/local/bin/python3
 # -*- coding: utf-8 -*-
-from urllib.request import urlopen
 from html.parser import HTMLParser
 from datetime import date, datetime
-from download import get_page_text
+from utils import load, str_to_date
 
 import log
 import argparse
 
 
-def str_to_date(date_str):
-    return datetime.strptime(date_str, '%d-%m-%y').date()
-
 def parse_argument():
     parser = argparse.ArgumentParser(
         prog='update',
         description='update links',
-        prefix_chars='--'
     )
 
     parser.add_argument(
         '--log',
         help='log level',
-        default='critical',
+        default='error',
         choices=['critical', 'error',  'debug'],
         dest='log_level'
     )
@@ -91,8 +86,6 @@ class GetUrls(HTMLParser):
         if self._in_a_tag:
             self._title = data
         if self._in_b_tag and self._flag_for_date:
-            #print(data)
-            #log.debug('parsing ' + self.link)
             cur_date = datetime.strptime(str(data), '%d.%m.%Y').date()
             link = {'link': self.link, 'title': self._title, 'date': cur_date}
             self._links.append(link)
@@ -109,52 +102,44 @@ def get_urls(page):
 VC_ARCHIVE_ROOT = "https://vc.ru/paper/archive/"
 
 
-def check_for_date(list_of_links, from_date, to_date):
-    new_list = list()
-    for link in list_of_links:
-        if from_date <= link['date'] <= to_date:
-            new_list.append(link)
-    return new_list
+def filter_with_date_interval(references, from_date, to_date):
+    return [reference for reference in references if from_date <= reference['date'] <= to_date]
 
-def next_date(cur_date):
-    temp = cur_date.month
-    if temp == 12:
-        cur_date = date(cur_date.year + 1, temp % 12 + 1, cur_date.day)
-    else:
-        cur_date = date(cur_date.year, temp % 12 + 1, cur_date.day)
-    return cur_date
+def date_range(from_date, to_date):
+    while from_date.month <= to_date.month or from_date.year < to_date.year:
+        yield from_date
+        if from_date.month == 12:
+            from_date = date(from_date.year + 1, from_date.month % 12 + 1, from_date.day)
+        else:
+            from_date = date(from_date.year, from_date.month % 12 + 1, from_date.day)
 
 def update(from_date, to_date, output):
-    list_of_links = list()
-    cur_date = from_date
-    while cur_date.month <= to_date.month or cur_date.year < to_date.year:
-        log.debug('Downloading data for ' + str(cur_date) + "...")
+    references = list()
+    for cur_date in date_range(from_date, to_date):
+        log.debug('Load archive page: {cur_date}')
         link_suffix = str(cur_date.year) + '/' + str(cur_date.month // 10) + str(cur_date.month % 10)
         link = VC_ARCHIVE_ROOT + link_suffix
-        month_page_text = get_page_text(link)
-        #month_page_text = month_page.read().decode('utf-8')
+        month_page_text = load(link)
         if (month_page_text != None):
-            log.debug('Got month page')
-            list_of_links = list_of_links + get_urls(month_page_text)
-        cur_date = next_date(cur_date)
-    list_of_links = check_for_date(list_of_links, from_date, to_date)
+            references = references + get_urls(month_page_text)
+    references = filter_with_date_interval(references, from_date, to_date)
     with open('links.txt', 'w') as links:
-        for link in list_of_links:
+        for link in references:
             links.write(link['link'] + '\n')
-    links.close()
 
-    log.debug('done')
     if output:
         print('Articles: ')
-        for link in list_of_links:
-            print(link['link'], link['title'])
+        for link in references:
+            print(link['link'])
 
 
 def main():
     args = parse_argument()
     log.config(log.level(args.log_level))
-    log.debug('running update with ' + args.log_level + ' logging level')
-    update(args.from_date, args.to_date, args.output)
+    try:
+        update(args.from_date, args.to_date, args.output)
+    except Exception as er:
+        log.critical('Update error occured: {er}')
 
 
 if __name__ == '__main__':
