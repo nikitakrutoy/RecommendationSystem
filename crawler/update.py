@@ -116,7 +116,7 @@ def date_range(from_date, to_date):
 def update(from_date, to_date, output):
     references = list()
     for cur_date in date_range(from_date, to_date):
-        log.debug('Load archive page: {cur_date}')
+        log.debug('Load archive page: ' + str(cur_date))
         link_suffix = str(cur_date.year) + '/' + str(cur_date.month // 10) + str(cur_date.month % 10)
         link = VC_ARCHIVE_ROOT + link_suffix
         month_page_text = load(link)
@@ -139,7 +139,7 @@ def main():
     try:
         update(args.from_date, args.to_date, args.output)
     except Exception as er:
-        log.critical('Update error occured: {er}')
+        log.critical('Update error occured: ' + er)
 
 
 if __name__ == '__main__':

@@ -59,7 +59,7 @@ def main():
                 links = lines.read().rstrip().split('\n')
         download(links)
     except Exception as e:
-        log.critical("Download error occured: {e}")
+        log.critical("Download error occured: " + e)
 
 
 if __name__ == '__main__':

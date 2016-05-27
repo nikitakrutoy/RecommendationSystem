@@ -82,7 +82,7 @@ def main():
     try:
         clear()
     except Exception as e:
-        log.critical("Clear error occured: {e}")
+        log.critical("Clear error occured: " + e)
 
 if __name__ == '__main__':
     main()
