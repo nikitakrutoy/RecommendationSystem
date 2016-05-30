@@ -15,8 +15,8 @@ def load(link):
     else:
         code = result.getcode();
         if code == 200:
-            log.debug("Load {link}: {code}")
+            log.debug("Load " + link + " : " + str(code))
             page_text = result.read().decode('utf-8')
             return page_text
         else:
-            log.debug("Load {link}: {code}")
+            log.debug("Load " + link + " : " + str(code))

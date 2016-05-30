@@ -70,8 +70,8 @@ def clear():
         if not os.path.isfile(article_path):
             with open(file_path, 'r') as html:
                 page = html.read()
-            log.debug('Clear {filename}')
-            article_text = clear_page(page)
+            log.debug('Clear ' + filename)
+            article_text = clear_page(page).lower();
             article = open(article_path, 'w')
             article.write(article_text)
             article.close()
