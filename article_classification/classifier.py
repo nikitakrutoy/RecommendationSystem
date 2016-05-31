@@ -4,14 +4,24 @@ import sklearn.feature_extraction.text, re
 import sklearn.linear_model
 import sklearn.metrics
 import sklearn.grid_search
+import pymorphy2
+from sklearn.pipeline import Pipeline
 
-WORD_PATTERN = '[a-z]+'
+WORD_PATTERN = '[а-я]+|[a-z]+'
 
 
 def get_text(article_path):
+    morph = pymorphy2.MorphAnalyzer()
     with open(article_path, 'r') as html:
         page = html.read()
-    return page
+        words = re.findall(WORD_PATTERN, page)
+        parsed_words = list()
+        for word in words:
+            parsed_word = morph.parse(word)[0]
+            if parsed_word.tag.POS not in {'PREP', 'CONJ', 'PRCL', 'INTJ'}:
+                parsed_words.append(word)
+        page = ' '.join(parsed_words)
+        return page
 
 def scorer(estimator, X, Y):
     metric = sklearn.metrics.roc_auc_score
@@ -46,9 +56,9 @@ def main():
     X = vectorizer.fit_transform(data)
     Y = np.array([1 if t in interesting else 0 for t in data])
 
-
-    X_train, X_search, X_test = X[:80], X[80:100], X[100:120]
-    Y_train, Y_search, Y_test = Y[:80], Y[80:100], Y[100:120]
+    border = 60
+    X_train, X_test = X[:border], X[border:]
+    Y_train, Y_test = Y[:border], Y[border:]
 
     cls = sklearn.linear_model.SGDClassifier(loss='log')
     cls.fit(X_train, Y_train)
@@ -60,21 +70,30 @@ def main():
     score = metric(Y_test, Y_pred)
     print('Score: ', score)
 
+    article_classifier = text_clf = Pipeline([('tfidf', sklearn.feature_extraction.text.TfidfVectorizer()),
+                                              ('classifier', sklearn.linear_model.SGDClassifier(loss='log'))])
+
+    border = 60
+    X_train, X_test = data[:border], data[border:]
+    Y_train, Y_test = Y[:border], Y[border:]
+
     grid = {
-        'penalty': ['elasticnet'],
-        'alpha': [0.001, 0.0001, 0.00001, 0.000001, 0.0000001],
-        'l1_ratio': [0.0, 0.01, 0.05, 0.10, 0.2, 0.3, 0.4, 0.5],
+        'classifier__penalty': ['elasticnet'],
+        'classifier__alpha': [0.001, 0.0001, 0.00001, 0.000001, 0.0000001],
+        'classifier__l1_ratio': [0.0, 0.01, 0.05, 0.10, 0.2, 0.3, 0.4, 0.5],
+        'tfidf__max_df': [0.85, 0.9, 0.95, 1.0],
+        'tfidf__min_df': [0.01, 0.05, 0.10, 0.15],
     }
 
     searcher = sklearn.grid_search.GridSearchCV(
-        estimator=sklearn.linear_model.SGDClassifier(loss='log'),
+        estimator=article_classifier,
         param_grid=grid,
         scoring=scorer,
         cv=5,
         n_jobs=1
     )
 
-    searcher.fit(X_search, Y_search);
+    searcher.fit(X_train, Y_train);
     print(searcher.best_score_)
     print(searcher.best_params_)
 
