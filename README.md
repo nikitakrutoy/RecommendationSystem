@@ -1,5 +1,5 @@
 # Desciption
-Recommend news that you probably would like. Uses linear classification model traind on news from [](https://vc.ru)
+Recommend news that you probably would like. Uses linear classification model traind on news from https://vc.ru
 
 Article classification/marker.py - GUI for marking news posts
 
