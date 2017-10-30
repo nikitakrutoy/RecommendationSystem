@@ -1,3 +1,12 @@
+# Desciption
+Recommend news that you probably would like. Uses linear classification model traind on news from ()[https://vc.ru]
+
+Article classification/marker.py - GUI for marking news posts
+
+
+
+
+
 # Рекомендательная система
 Учебный проект.
 clone of bitbucket repo https://bitbucket.org/nikitakrutoy/recommndersystem
